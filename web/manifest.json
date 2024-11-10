@@ -1,6 +1,6 @@
 {
-    "name": "privacy",
-    "short_name": "privacy",
+    "name": "隐私政策",
+    "short_name": "隐私政策",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

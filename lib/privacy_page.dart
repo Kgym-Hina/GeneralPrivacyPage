@@ -19,7 +19,7 @@ class _PrivacyStatementPageState extends State<PrivacyStatementPage> {
   }
 
   Future<void> _loadPrivacyPolicy() async {
-    final privacyPolicy = await rootBundle.loadString('template.txt');
+    final privacyPolicy = await rootBundle.loadString('assets/template.txt');
     setState(() {
       _privacyPolicy = privacyPolicy;
     });
