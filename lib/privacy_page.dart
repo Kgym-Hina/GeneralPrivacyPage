@@ -1,3 +1,4 @@
+import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 class PrivacyStatementPage extends StatefulWidget {
@@ -11,11 +12,30 @@ class PrivacyStatementPage extends StatefulWidget {
 
 class _PrivacyStatementPageState extends State<PrivacyStatementPage> {
   String _privacyPolicy = "加载中";
+  String _selectedApplication = 'Ham Toolkit';
+  String _selectedPrivacyTitle = '隐私政策';
+  List<String>? _applications;
+
+  Client client = Client();
+  late Account account;
 
   @override
   void initState() {
-    _loadPrivacyPolicy();
+    _initAppwrite();
     super.initState();
+  }
+
+  Future<void> _initAppwrite() async {
+    client
+        .setEndpoint('https://d-app.last-remote.xyz:7356/v1') // Your API Endpoint
+        .setProject('6737101500291d684581');
+    account = Account(client);
+    await account.createAnonymousSession();
+    _loadApplications();
+  }
+
+  Future<void> _loadApplications() async {
+
   }
 
   Future<void> _loadPrivacyPolicy() async {
@@ -24,6 +44,11 @@ class _PrivacyStatementPageState extends State<PrivacyStatementPage> {
       _privacyPolicy = privacyPolicy;
     });
   }
+
+  void onApplicationChanged(Object? value) {
+
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -51,6 +76,10 @@ class _PrivacyStatementPageState extends State<PrivacyStatementPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              DropdownButton(items: const [
+                DropdownMenuItem(value: 'Ham Toolkit', child: Text('Ham Toolkit')
+                ),
+              ], onChanged: onApplicationChanged, value: _selectedApplication),
               Text('Ham Toolkit 隐私政策', style: Theme.of(context).textTheme.headlineLarge),
               Text('2024-11-10', style: Theme.of(context).textTheme.labelMedium),
               const SizedBox(height: 16),
@@ -61,4 +90,6 @@ class _PrivacyStatementPageState extends State<PrivacyStatementPage> {
       ),
     );
   }
+
+
 }
