@@ -1,7 +1,7 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PrivacyStatementPage extends StatefulWidget {
@@ -64,6 +64,7 @@ class _PrivacyStatementPageState extends State<PrivacyStatementPage> {
 
     _loadApplications();
   }
+
   Future<void> _loadApplications() async {
     final database = Databases(client);
     print('Loading applications');
@@ -72,12 +73,15 @@ class _PrivacyStatementPageState extends State<PrivacyStatementPage> {
     print('Loaded applications: ${apps.documents.length}');
     setState(() {
       _applicationDocuments = apps;
-      _selectedApplication = apps.documents.first.data['application_name'];
-      _applicationNames = apps.documents
-          .map((doc) => doc.data['application_name'].toString())
-          .toList();
-      print("Application names: $_applicationNames");
-      _loading = false;
+      if (apps.documents.isNotEmpty) {
+        _selectedApplication = apps.documents.first.data['application_name'];
+        _applicationNames = apps.documents
+            .map((doc) => doc.data['application_name'].toString())
+            .toList();
+        print("Application names: $_applicationNames");
+        _loading = false;
+        _loadPrivacyDocuments(); // Automatically load privacy documents for the first application
+      }
     });
   }
 
@@ -164,7 +168,7 @@ void onApplicationChanged(String? value) {
               Text(_selectedPrivacyDate,
                   style: Theme.of(context).textTheme.labelMedium),
               const SizedBox(height: 16),
-              Text(_privacyPolicy)
+              MarkdownBody(data: _privacyPolicy)
             ],
           ),
         ),
