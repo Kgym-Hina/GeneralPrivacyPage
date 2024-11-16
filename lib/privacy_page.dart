@@ -16,7 +16,7 @@ class PrivacyStatementPage extends StatefulWidget {
 class _PrivacyStatementPageState extends State<PrivacyStatementPage> {
   String _privacyPolicy = "加载中";
   String _selectedApplication = 'Ham Toolkit';
-  String _selectedPrivacyTitle = '隐私政策';
+  String _selectedPrivacyTitle = '加载中';
   String _selectedPrivacyDate = '2024-11-10';
   DocumentList? _applicationDocuments;
   DocumentList? _docDocuments;
@@ -130,6 +130,17 @@ void onApplicationChanged(String? value) {
   _loadPrivacyDocuments();
 }
 
+void onPrivacyDocumentChanged(String? value) {
+  setState(() {
+    _selectedPrivacyTitle = value!;
+  });
+  final selectedDoc = _docDocuments?.documents.firstWhere(
+      (doc) => doc.data['title'] == _selectedPrivacyTitle);
+  if (selectedDoc != null) {
+    _loadPrivacyPolicy(selectedDoc);
+  }
+}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -212,7 +223,7 @@ void onApplicationChanged(String? value) {
               child: Text(value),
             ))
                 .toList(),
-            onChanged: (a) {},
+            onChanged: onPrivacyDocumentChanged,
           ),
           const Spacer(),
           IconButton(
