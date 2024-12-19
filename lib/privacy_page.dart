@@ -42,7 +42,7 @@ class _PrivacyStatementPageState extends State<PrivacyStatementPage> {
   Future<void> _initAppwrite() async {
     client
         .setEndpoint(
-            'https://d-app.last-remote.xyz:7356/v1') // Your API Endpoint
+            'https://api.clarium-noctis.moe/v1') // Your API Endpoint
         .setProject('6737101500291d684581');
     account = Account(client);
 
