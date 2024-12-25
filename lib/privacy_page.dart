@@ -1,8 +1,11 @@
+import 'dart:collection';
+
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 // Appwrite constants
 const String appwriteEndpoint = 'https://api.clarium-noctis.moe/v1';
@@ -10,6 +13,7 @@ const String appwriteProjectId = '6737101500291d684581';
 const String appwriteDatabaseId = 'privacydb';
 const String appwriteApplicationsCollectionId = 'applications';
 const String appwritePrivacyDocumentsCollectionId = 'privacy_documents';
+const String appwriteInformationCollectionId = 'information';
 
 class PrivacyStatementPage extends StatefulWidget {
   final VoidCallback toggleTheme;
@@ -29,6 +33,7 @@ class _PrivacyStatementPageState extends State<PrivacyStatementPage> {
   DocumentList? _docDocuments;
   List<String> _applicationNames = [];
   List<String> _docTitles = [];
+  HashMap<String, String> _informationTexts = HashMap();
   bool _loading = true;
   bool _showDropdown = true;
 
@@ -69,6 +74,21 @@ class _PrivacyStatementPageState extends State<PrivacyStatementPage> {
     }
 
     _loadApplications();
+    _loadInformation();
+  }
+
+  Future<void> _loadInformation() async {
+    final database = Databases(client);
+    print('Loading information');
+    final infoDocs = await database.listDocuments(
+        databaseId: appwriteDatabaseId, collectionId: appwriteInformationCollectionId);
+    print('Loaded information: ${infoDocs.documents.length}');
+    setState(() {
+      _informationTexts = infoDocs.documents.fold(HashMap(), (map, doc) {
+        map[doc.data['Text']] = doc.data['Link'];
+        return map;
+      });
+    });
   }
 
   Future<void> _loadApplications() async {
@@ -147,6 +167,7 @@ class _PrivacyStatementPageState extends State<PrivacyStatementPage> {
     }
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -185,7 +206,7 @@ class _PrivacyStatementPageState extends State<PrivacyStatementPage> {
               Text(_selectedPrivacyDate,
                   style: Theme.of(context).textTheme.labelMedium),
               const SizedBox(height: 16),
-              MarkdownBody(data: _privacyPolicy)
+              MarkdownBody(data: _privacyPolicy),
             ],
           ),
         ),
@@ -199,6 +220,35 @@ class _PrivacyStatementPageState extends State<PrivacyStatementPage> {
           });
         },
         child: const Icon(Icons.arrow_upward),
+      ),
+      bottomNavigationBar: Container(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Clarium Noctis © ${DateTime.now().year}',
+              style: Theme.of(context).textTheme.labelMedium,
+            ),
+            const SizedBox(height: 8),
+            // 显示所有Information文档
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: _informationTexts.keys.map((text) {
+                return ElevatedButton(
+                  onPressed: () {
+                    final url = _informationTexts[text];
+                    if (url != null) {
+                      launchUrlString(url);
+                    }
+                  },
+                  child: Text(text),
+                );
+              }).toList(),
+            ),
+          ],
+        ),
       ),
     );
   }
