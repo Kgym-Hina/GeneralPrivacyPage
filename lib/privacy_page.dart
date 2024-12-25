@@ -39,10 +39,12 @@ class _PrivacyStatementPageState extends State<PrivacyStatementPage> {
 
   Client client = Client();
   late Account account;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     _initAppwrite();
+    _scrollController.addListener(_scrollListener);
     super.initState();
   }
 
@@ -167,6 +169,25 @@ class _PrivacyStatementPageState extends State<PrivacyStatementPage> {
     }
   }
 
+  void _scrollListener() {
+    if (_scrollController.offset >= 200) {
+      setState(() {
+        _showDropdown = false;
+      });
+    } else {
+      setState(() {
+        _showDropdown = true;
+      });
+    }
+  }
+
+  void _scrollToTop() {
+    _scrollController.animateTo(
+      0.0,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -191,6 +212,7 @@ class _PrivacyStatementPageState extends State<PrivacyStatementPage> {
       body: Padding(
         padding: const EdgeInsets.only(left: 16, right: 16),
         child: SingleChildScrollView(
+          controller: _scrollController,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -217,6 +239,7 @@ class _PrivacyStatementPageState extends State<PrivacyStatementPage> {
         onPressed: () {
           setState(() {
             _showDropdown = true;
+            _scrollToTop();
           });
         },
         child: const Icon(Icons.arrow_upward),
