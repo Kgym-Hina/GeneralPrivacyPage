@@ -4,21 +4,13 @@ import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:privacy/appwrite_config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
-// Appwrite constants
-const String appwriteEndpoint = 'https://api.clarium-noctis.moe/v1';
-const String appwriteProjectId = '6737101500291d684581';
-const String appwriteDatabaseId = 'privacydb';
-const String appwriteApplicationsCollectionId = 'applications';
-const String appwritePrivacyDocumentsCollectionId = 'privacy_documents';
-const String appwriteInformationCollectionId = 'information';
-
 class PrivacyStatementPage extends StatefulWidget {
-  final VoidCallback toggleTheme;
 
-  const PrivacyStatementPage({super.key, required this.toggleTheme});
+  const PrivacyStatementPage({super.key});
 
   @override
   State<PrivacyStatementPage> createState() => _PrivacyStatementPageState();
@@ -200,14 +192,6 @@ class _PrivacyStatementPageState extends State<PrivacyStatementPage> {
             onPressed: () => _loadPrivacyPolicy(_docDocuments!.documents.first),
           ),
         ],
-        leading: IconButton(
-          icon: Icon(
-            Theme.of(context).brightness == Brightness.dark
-                ? Icons.light_mode
-                : Icons.dark_mode,
-          ),
-          onPressed: widget.toggleTheme,
-        ),
       ),
       body: Padding(
         padding: const EdgeInsets.only(left: 16, right: 16),

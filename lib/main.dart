@@ -1,42 +1,47 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
+import 'package:go_router/go_router.dart';
 import 'package:privacy/privacy_page.dart';
+import 'package:privacy/remove_account_page.dart';
 
 void main() {
-  runApp(const PrivacyPage());
-}
-
-class PrivacyPage extends StatefulWidget {
-  const PrivacyPage({super.key});
-
-  @override
-  State<PrivacyPage> createState() => _PrivacyPageState();
-}
-
-class _PrivacyPageState extends State<PrivacyPage> {
-  ThemeMode _themeMode = ThemeMode.system;
-
-  void _toggleTheme() {
-    setState(() {
-      _themeMode = _themeMode == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
-    });
+  if (kIsWeb){
+    usePathUrlStrategy();
   }
 
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    final GoRouter router = GoRouter(
+      routes: [
+        GoRoute(
+          path: '/',
+          builder: (context, state) => const PrivacyStatementPage(),
+        ),
+        GoRoute(
+          path: '/remove',
+          builder: (context, state) => const RemoveAccountPage(),
+        ),
+      ],
+    );
+
+    return MaterialApp.router(
+      routerConfig: router,
       title: '隐私政策',
       theme: ThemeData(
-        colorSchemeSeed: Colors.deepOrange,
+        colorSchemeSeed: Colors.deepPurple,
         useMaterial3: true,
         brightness: Brightness.light,
       ),
       darkTheme: ThemeData(
         useMaterial3: true,
-        colorSchemeSeed: Colors.deepOrange,
+        colorSchemeSeed: Colors.deepPurple,
         brightness: Brightness.dark,
       ),
-      themeMode: _themeMode,
-      home: PrivacyStatementPage(toggleTheme: _toggleTheme),
     );
   }
 }
