@@ -4,6 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+// Appwrite constants
+const String appwriteEndpoint = 'https://api.clarium-noctis.moe/v1';
+const String appwriteProjectId = '6737101500291d684581';
+const String appwriteDatabaseId = 'privacydb';
+const String appwriteApplicationsCollectionId = 'applications';
+const String appwritePrivacyDocumentsCollectionId = 'privacy_documents';
+
 class PrivacyStatementPage extends StatefulWidget {
   final VoidCallback toggleTheme;
 
@@ -41,9 +48,8 @@ class _PrivacyStatementPageState extends State<PrivacyStatementPage> {
 
   Future<void> _initAppwrite() async {
     client
-        .setEndpoint(
-            'https://api.clarium-noctis.moe/v1') // Your API Endpoint
-        .setProject('6737101500291d684581');
+        .setEndpoint(appwriteEndpoint) // Your API Endpoint
+        .setProject(appwriteProjectId);
     account = Account(client);
 
     final prefs = await SharedPreferences.getInstance();
@@ -69,7 +75,7 @@ class _PrivacyStatementPageState extends State<PrivacyStatementPage> {
     final database = Databases(client);
     print('Loading applications');
     final apps = await database.listDocuments(
-        databaseId: "privacydb", collectionId: "applications");
+        databaseId: appwriteDatabaseId, collectionId: appwriteApplicationsCollectionId);
     print('Loaded applications: ${apps.documents.length}');
     setState(() {
       _applicationDocuments = apps;
@@ -85,61 +91,61 @@ class _PrivacyStatementPageState extends State<PrivacyStatementPage> {
     });
   }
 
-Future<void> _loadPrivacyDocuments() async {
-  final database = Databases(client);
-  print('Loading documents for application: $_selectedApplication');
-  final selectedAppDoc = _applicationDocuments?.documents.firstWhere(
-      (doc) => doc.data['application_name'] == _selectedApplication);
-  print('Selected application: ${selectedAppDoc?.data}');
-  final selectedAppId = selectedAppDoc?.$id;
+  Future<void> _loadPrivacyDocuments() async {
+    final database = Databases(client);
+    print('Loading documents for application: $_selectedApplication');
+    final selectedAppDoc = _applicationDocuments?.documents.firstWhere(
+        (doc) => doc.data['application_name'] == _selectedApplication);
+    print('Selected application: ${selectedAppDoc?.data}');
+    final selectedAppId = selectedAppDoc?.$id;
 
-  if (selectedAppId != null) {
-    print('Loading documents for application ID: $selectedAppId');
-    final docs = await database.listDocuments(
-        databaseId: "privacydb", collectionId: "privacy_documents", queries: [
-      Query.equal("application", selectedAppId)
-    ]);
-    print('Loaded documents: ${docs.documents.length}');
+    if (selectedAppId != null) {
+      print('Loading documents for application ID: $selectedAppId');
+      final docs = await database.listDocuments(
+          databaseId: appwriteDatabaseId, collectionId: appwritePrivacyDocumentsCollectionId, queries: [
+        Query.equal("application", selectedAppId)
+      ]);
+      print('Loaded documents: ${docs.documents.length}');
+      setState(() {
+        _docDocuments = docs;
+        _selectedPrivacyTitle = docs.documents.first.data['title'];
+        _docTitles = docs.documents
+            .map((doc) => doc.data['title'].toString())
+            .toList();
+        _loading = false;
+      });
+      _loadPrivacyPolicy(docs.documents.first);
+    } else {
+      print('No application selected or application ID not found');
+    }
+  }
+
+  Future<void> _loadPrivacyPolicy(Document document) async {
     setState(() {
-      _docDocuments = docs;
-      _selectedPrivacyTitle = docs.documents.first.data['title'];
-      _docTitles = docs.documents
-          .map((doc) => doc.data['title'].toString())
-          .toList();
-      _loading = false;
+      _privacyPolicy = document.data['content'];
+      _selectedPrivacyTitle = document.data['title'];
+      _selectedPrivacyDate = document.$updatedAt;
     });
-    _loadPrivacyPolicy(docs.documents.first);
-  } else {
-    print('No application selected or application ID not found');
   }
-}
 
-Future<void> _loadPrivacyPolicy(Document document) async {
-  setState(() {
-    _privacyPolicy = document.data['content'];
-    _selectedPrivacyTitle = document.data['title'];
-    _selectedPrivacyDate = document.$updatedAt;
-  });
-}
-
-void onApplicationChanged(String? value) {
-  setState(() {
-    _selectedApplication = value!;
-    _loading = true;
-  });
-  _loadPrivacyDocuments();
-}
-
-void onPrivacyDocumentChanged(String? value) {
-  setState(() {
-    _selectedPrivacyTitle = value!;
-  });
-  final selectedDoc = _docDocuments?.documents.firstWhere(
-      (doc) => doc.data['title'] == _selectedPrivacyTitle);
-  if (selectedDoc != null) {
-    _loadPrivacyPolicy(selectedDoc);
+  void onApplicationChanged(String? value) {
+    setState(() {
+      _selectedApplication = value!;
+      _loading = true;
+    });
+    _loadPrivacyDocuments();
   }
-}
+
+  void onPrivacyDocumentChanged(String? value) {
+    setState(() {
+      _selectedPrivacyTitle = value!;
+    });
+    final selectedDoc = _docDocuments?.documents.firstWhere(
+        (doc) => doc.data['title'] == _selectedPrivacyTitle);
+    if (selectedDoc != null) {
+      _loadPrivacyPolicy(selectedDoc);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
