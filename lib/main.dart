@@ -13,7 +13,7 @@ class PrivacyPage extends StatefulWidget {
 }
 
 class _PrivacyPageState extends State<PrivacyPage> {
-  ThemeMode _themeMode = ThemeMode.light;
+  ThemeMode _themeMode = ThemeMode.system;
 
   void _toggleTheme() {
     setState(() {
